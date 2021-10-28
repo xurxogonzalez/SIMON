@@ -35,12 +35,22 @@ interval = null;
 
 
 const keyGame = (e) => {
-    if (e.target.classList.contains('active')) {
-        output.innerHTML = `${++you}-${simon}`;
-    }else{
-        output.innerHTML = `${you}-${++simon}`;
+    console.log(e.target.dataset.id)
+    let indice = memoria.findIndex(
+        (el) => el===e.target.dataset.id
+    );
+    
+    if(indice!==-1) {
+        memoria.splice(indice,1);
+        console.log(`${indice}-${memoria}`)
     }
-    limpiar()
+
+    // if (e.target.classList.contains('active')) {
+    //     output.innerHTML = `${++you}-${simon}`;
+    // }else{
+    //     output.innerHTML = `${you}-${++simon}`;
+    // }
+    // limpiar()
 
 }
 
@@ -48,12 +58,16 @@ const keyGame = (e) => {
  * Juego se inicia
  */
 
-let tiradas = 4;
+let tiradas = 0;
 let contador = 0;
 let memoria = [];
+let simonCanta = true;
+
 const goGame = () => {
-    if(interval)
+    if(interval || !simonCanta)
         return;
+    //console.log("go")
+    simonCanta = false;
     interval = setInterval(
         () => {
             
@@ -62,21 +76,14 @@ const goGame = () => {
             contador++;
             const random = Math.floor(Math.random() * 4);
             targets[random].classList.add("active");
-            //memoria.push(targets[random].)
+            memoria.push(targets[random].dataset.id);
+            console.log(memoria)
             setTimeout(
                 () => {
                     limpiar();
                 },
                 time
             );
-
-           
-
-            console.log(`${tiradas}-${contador}`)
-
-
-            //    topLeft.focus();
-            //    topLeft.textContent = "hola";
         },
         time * 2
     );
@@ -89,8 +96,10 @@ const powerOffSimon = () => {
     clearInterval(interval);
     interval = null;
     contador = 0;
-    tiradas = 4;
+    tiradas = 0;
     output.innerHTML = "-";
+    simonCanta = true;
+    memoria = [];
     you = 0;
     simon = 0;
 }
