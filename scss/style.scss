@@ -60,9 +60,10 @@
     // }
     &:active {
       transform: scale(0.99);
+      filter: contrast(200%);
     }
     &.active{
-      opacity: .5;
+      filter: contrast(500%);
     }
   }
   .controls {
