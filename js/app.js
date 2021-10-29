@@ -37,13 +37,16 @@ btnStart.value = "on";
 
 
 //Funciones
+const generarAudio = audio => {
+    sounds[audio].currentTime = 0;
+    sounds[audio].play();
+}
 /**
  * 
  * @param {*} e Evento del botón 
  */
 const btnPush = (e) => {
-    sounds[e.target.dataset.id].currentTime = 0;
-    sounds[e.target.dataset.id].play();
+    generarAudio(e.target.dataset.id);
     //console.log(e.target.dataset.id) //identificador del botón pulsado
     //console.log(`${memoria.join()}. Contador: ${contador}, tiradas: ${tiradas}`)
     console.log(simonTiradas)
@@ -93,6 +96,7 @@ const simonSay = () => {
                 clearInterval(interval);
             const random = Math.floor(Math.random() * 4);
             targets[random].classList.add("active");
+            generarAudio(targets[random].dataset.id);
             simonTiradas.push(targets[random].dataset.id);
             setTimeout(
                 () => {
