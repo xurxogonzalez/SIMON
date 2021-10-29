@@ -14,27 +14,26 @@
 const topLeft = document.querySelector(".simon__topleft");
 const targets = document.querySelectorAll("[class^=simon__]");
 const output = document.querySelector(".controls__output");
-const startBnt = document.querySelector(".controls__start");
+const btnStart = document.querySelector(".controls__start");
 const powerCheck = document.querySelector(".controls__power input");
+const strictCheck = document.querySelector(".controls__strict input");
 
 
 //Variables
-let you = 0;
-let simon = 0;
 let tiradas = 0;
 let contador = 0;
-let memoria = [];
-let sw = false; 
+let simonTiradas = [];
 let interval = null;
 const sounds = {
     bottomleft: new Audio("../audio/simonSound1.mp3"),
     topright: new Audio("../audio/simonSound2.mp3"),
     topleft: new Audio("../audio/simonSound3.mp3"),
-    bottomright: new Audio ("../audio/simonSound4.mp3"),
+    bottomright: new Audio("../audio/simonSound4.mp3"),
 }
 
 //Reseteo de marcador
 output.innerHTML = "-";
+btnStart.value = "on";
 
 
 //Funciones
@@ -43,43 +42,58 @@ output.innerHTML = "-";
  * @param {*} e Evento del botón 
  */
 const btnPush = (e) => {
-    sounds[e.target.dataset.id].currentTime=0;
+    sounds[e.target.dataset.id].currentTime = 0;
     sounds[e.target.dataset.id].play();
     //console.log(e.target.dataset.id) //identificador del botón pulsado
     //console.log(`${memoria.join()}. Contador: ${contador}, tiradas: ${tiradas}`)
-    console.log(memoria)
-    if(memoria.length>0){
-        let indice = memoria.findIndex(
-            (el) => el===e.target.dataset.id
-        );
-        if(indice!==-1)
-            memoria.splice(indice,1);
-        if(memoria.length===0){
-            contador = 0;
-            setTimeout(
-                () => {
-                    simonSay();
-                },
-                1000
-            );
-            
+    console.log(simonTiradas)
+
+    if (simonTiradas.length > 0) {
+        let indice = 0;
+        let find = false;
+        if (strictCheck.checked) {
+            find = (e.target.dataset.id === simonTiradas[indice]) ? true : false;
         }
-    }  
+        else {
+            indice = simonTiradas.findIndex(
+                (el) => el === e.target.dataset.id
+            );
+            find = (indice !== -1) ? true : false;
+        }
+
+
+        if (find) {
+            simonTiradas.splice(indice, 1);
+            output.style.backgroundColor = `rgb(${[61, 58, 70].join()})`;
+
+
+        } else {
+            output.style.backgroundColor = "red";
+        }
+        if (simonTiradas.length === 0) {
+            contador = 0;
+            btnStart.value = "on"; //Hasta que el array no llegue a 0 no dejamos que simón vuelva a hablar pulsando de nuevo el botón Start
+
+        }
+        output.innerHTML = simonTiradas.length;
+
+    }
+
 }
 
 /**
- * Mecanimos para realizar la serie de tiradas
+ * Almacenamos en un array las tiradas de Simón
  */
 const simonSay = () => {
-   
+
     interval = setInterval(
-        () => {    
+        () => {
             contador++;
-            if(interval && contador>=tiradas)
+            if (interval && contador >= tiradas)
                 clearInterval(interval);
             const random = Math.floor(Math.random() * 4);
             targets[random].classList.add("active");
-            memoria.push(targets[random].dataset.id);
+            simonTiradas.push(targets[random].dataset.id);
             setTimeout(
                 () => {
                     targets[random].classList.remove("active");
@@ -90,21 +104,13 @@ const simonSay = () => {
         1000
     );
 
-    aumentarTiradas();
-    
+    generarTiradas();
+
 }
 
 
 
-const startGame = () => {
-    if(sw)
-        return;
-    //console.log("go")
-    
-    simonSay();
-    sw = true;
-   
-}
+
 
 /**
  * Apagamos el juego
@@ -115,24 +121,23 @@ const powerOffSimon = () => {
     contador = 0;
     tiradas = 0;
     output.innerHTML = "-";
-    memoria = [];
-    you = 0;
-    simon = 0;
-    sw = false;
+    simonTiradas = [];
+    btnStart.value = "on";
 }
 
 /**
- * Aumentar las tiradas
+ * Generamos las tiradas. En este caso de forma aleatoria entre 1 y 5
  */
-const aumentarTiradas = () => {
-    tiradas = Math.floor(Math.random()*5);
+const generarTiradas = () => {
+    tiradas = Math.floor(Math.random() * 5);
+    output.innerHTML = tiradas ? tiradas : 1;
 }
 
 //Eventos
 powerCheck.addEventListener(
     "change",
     () => {
-        if(!powerCheck.checked){
+        if (!powerCheck.checked) {
             powerOffSimon()
         }
     }
@@ -140,13 +145,15 @@ powerCheck.addEventListener(
 );
 
 //Botón de comienzo de partida
-startBnt.addEventListener(
+btnStart.addEventListener(
     "click",
-    () => {
+    (e) => {
 
-        if (powerCheck.checked) {
-                startGame(); //Si el power está marcado y pulsamos este botón empezamos el juego       
-        } 
+        if (powerCheck.checked && btnStart.value === "on") {
+
+            simonSay(); //Simón realiza una tirada 
+            btnStart.value = "off";//Apagamos el botón hasta que el usuario realice la tirada de manera correcta   
+        }
 
     }
 );
